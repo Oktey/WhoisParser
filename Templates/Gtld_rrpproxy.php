@@ -1,12 +1,12 @@
 <?php
 /**
  * Novutec Domain Tools
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,76 +34,88 @@ use Novutec\WhoisParser\Templates\Type\Regex;
  * @copyright  Copyright (c) 2007 - 2013 Novutec Inc. (http://www.novutec.com)
  * @license    http://www.apache.org/licenses/LICENSE-2.0
  */
+
+
 class Gtld_rrpproxy extends Regex
 {
 
     /**
-	 * Blocks within the raw output of the whois
-	 * 
-	 * @var array
-	 * @access protected
-	 */
+     * Blocks within the raw output of the whois
+     *
+     * @var array
+     * @access protected
+     */
     protected $blocks = array(
-            1 => '/owner-(id|contact|name|organization):(?>[\x20\t]*)(.*?)(?=admin-(id|contact|name|organization))/is', 
-            2 => '/admin-(id|contact|name|organization):(?>[\x20\t]*)(.*?)(?=tech-(id|contact|name|organization))/is', 
-            3 => '/tech-(id|contact|name|organization):(?>[\x20\t]*)(.*?)(?=billing-(id|contact|name|organization))/is', 
-            4 => '/billing-(id|contact|name|organization):(?>[\x20\t]*)(.*?)(?=nameserver|$)/is', 
-            5 => '/(nameserver|nserver)([0-9]{0,1}):(?>[\x20\t]*)(.*?)(?=owner-(id|contact|name|organization)|$)/is', 
-            6 => '/created(\-| )date:(?>[\x20\t]*)(.*?)(?=owner-(id|contact|name|organization)|$)/is');
+            1 => '/Domain Name(?>[\x20\t]*)(.*?)(?=Registrant Name)/is',
+            2 => '/Registrant Name(?>[\x20\t]*)(.*?)(?=Admin Name)/is',
+            3 => '/Admin Name(?>[\x20\t]*)(.*?)(?=Tech Name)/is',
+            4 => '/Tech Name(?>[\x20\t]*)(.*?)(?=Name Server)/is',
+            5 => '/Name Server(?>[\x20\t]*)(.*?)$/is',
+    );
 
     /**
-	 * Items for each block
-	 * 
-	 * @var array
-	 * @access protected
-	 */
+     * Items for each block
+     *
+     * @var array
+     * @access protected
+     */
     protected $blockItems = array(
-            1 => array('/^owner-(contact|id):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:handle', 
-                    '/^owner-(organization|company|org):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:organization', 
-                    '/^owner-([fl]{0,1})name:(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:name', 
-                    '/^owner-(street|address):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:address', 
-                    '/^owner-city:(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:city', 
-                    '/^owner-state:(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:state', 
-                    '/^owner-(zip|postcode|pcode):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:zipcode', 
-                    '/^owner-country:(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:country', 
-                    '/^owner-(telephone|phone):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:phone', 
-                    '/^owner-fax:(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:fax', 
-                    '/^owner-email:(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:email'), 
-            2 => array('/^admin-(contact|id):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:handle', 
-                    '/^admin-(organization|company|org):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:organization', 
-                    '/^admin-([fl]{0,1})name:(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:name', 
-                    '/^admin-(street|address):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:address', 
-                    '/^admin-city:(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:city', 
-                    '/^admin-state:(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:state', 
-                    '/^admin-(zip|postcode|pcode):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:zipcode', 
-                    '/^admin-country:(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:country', 
-                    '/^admin-(telephone|phone):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:phone', 
-                    '/^admin-fax:(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:fax', 
-                    '/^admin-email:(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:email'), 
-            3 => array('/^tech-(contact|id):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:handle', 
-                    '/^tech-(organization|company|org):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:organization', 
-                    '/^tech-([fl]{0,1})name:(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:name', 
-                    '/^tech-(street|address):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:address', 
-                    '/^tech-city:(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:city', 
-                    '/^tech-state:(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:state', 
-                    '/^tech-(zip|postcode|pcode):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:zipcode', 
-                    '/^tech-country:(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:country', 
-                    '/^tech-(telephone|phone):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:phone', 
-                    '/^tech-fax:(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:fax', 
-                    '/^tech-email:(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:email'), 
-            4 => array('/^billing-(contact|id):(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:handle', 
-                    '/^billing-(organization|company|org):(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:organization', 
-                    '/^billing-([fl]{0,1})name:(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:name', 
-                    '/^billing-(street|address):(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:address', 
-                    '/^billing-city:(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:city', 
-                    '/^billing-state:(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:state', 
-                    '/^billing-(zip|postcode|pcode):(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:zipcode', 
-                    '/^billing-country:(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:country', 
-                    '/^billing-(telephone|phone):(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:phone', 
-                    '/^billing-fax:(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:fax', 
-                    '/^billing-email:(?>[\x20\t]*)(.+)$/im' => 'contacts:billing:email'), 
-            5 => array('/^(nameserver|nserver)[0-9]{0,1}:(?>[\x20\t]*)(.*?)$/im' => 'nameserver'), 
-            6 => array('/^created(\-| )date:(?>[\x20\t]*)(.*?)$/im' => 'created', 
-                    '/^updated(\-| )date:(?>[\x20\t]*)(.*?)$/im' => 'changed', 
-                    '/^(registration-){0,1}expiration(\-| )date:(?>[\x20\t]*)(.*?)$/im' => 'expires'));
+            1 => array(
+                    // Registrar Details
+                    '/Registry Domain ID(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'registrar:id',
+                    '/Registrar(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'registrar:name',
+                    '/Abuse Contact Email(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'registrar:email',
+                    '/Registrar Abuse Contact Phone(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'registrar:phone',
+                    '/Registrar URL(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'registrar:url',
+
+                    // Registration Details
+                    '/^creation date:(.+)$/im' => 'created',
+                    '/^updated date:(.+)$/im' => 'changed',
+                    '/^registry expiry date:(.+)$/im' => 'expires',
+                    '/^domain status:(.+)$/im' => 'registered',
+            ),
+            2 => array(
+                    // Owner details
+                    '/Registrant Name(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:name',
+                    '/Registrant Organization(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:organization',
+                    '/Registrant Street(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:address',
+                    '/Registrant City(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:owner:city',
+                    '/Registrant State\/Province(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:owner:state',
+                    '/Registrant Postal Code(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:owner:zipcode',
+                    '/Registrant Country(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:owner:country',
+                    '/Registrant Phone(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:owner:phone',
+                    '/Registrant Fax(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:owner:fax',
+                    '/Registrant Email(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:owner:email',
+            ),
+            3 => array(
+                    // Admin details
+                    '/Admin Name(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:name',
+                    '/Admin Organization(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:organization',
+                    '/Admin Street(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:address',
+                    '/Admin City(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:admin:city',
+                    '/Admin State\/Province(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:admin:state',
+                    '/Admin Postal Code(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:admin:zipcode',
+                    '/Admin Country(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:admin:country',
+                    '/Admin Phone(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:admin:phone',
+                    '/Admin Fax(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:admin:fax',
+                    '/Admin Email(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:admin:email',
+            ),
+            4 => array(
+                    // Tech details
+                    '/Tech Name(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:name',
+                    '/Tech Organization(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:organization',
+                    '/Tech Street(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:address',
+                    '/Tech City(?>[\.]*):(?>[\x20\t]*)(.+)$/im' => 'contacts:tech:city',
+                    '/Tech State\/Province(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:tech:state',
+                    '/Tech Postal Code(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:tech:zipcode',
+                    '/Tech Country(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:tech:country',
+                    '/Tech Phone(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:tech:phone',
+                    '/Tech Fax(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:tech:fax',
+                    '/Tech Email(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'contacts:tech:email',
+            ),
+            5 => array(
+                    // Name servers
+                    '/Name Server(?>[\.]*):(?>[\x20\t]*)(.*)$/im' => 'nameserver',
+            )
+    );
 }
