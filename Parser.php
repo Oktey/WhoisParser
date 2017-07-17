@@ -1,12 +1,12 @@
 <?php
 /**
  * Novutec Domain Tools
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ use Novutec\WhoisParser\Templates\Type\AbstractTemplate;
 
 /**
  * WhoisParser
- * 
+ *
  * Automatically follows the WHOIS registry referral chains until it finds the
  * correct WHOIS for the most complete WHOIS data. Exceptionally robust WHOIS parser
  * that parses a variety of free form WHOIS data into well-structured data that your
@@ -57,7 +57,7 @@ class Parser
 
     /**
      * WhoisParserConfig object
-     * 
+     *
      * @var object
      * @access protected
      */
@@ -65,7 +65,7 @@ class Parser
 
     /**
      * Query string sent to the WhoisParser
-     * 
+     *
      * @var object
      * @access protected
      */
@@ -73,7 +73,7 @@ class Parser
 
     /**
      * Raw output from whois server unformatted
-     * 
+     *
      * @var string
      * @access protected
      */
@@ -81,7 +81,7 @@ class Parser
 
     /**
      * WhoisParserResult object
-     * 
+     *
      * @var \Novutec\WhoisParser\Result\Result
      * @access protected
      */
@@ -89,7 +89,7 @@ class Parser
 
     /**
      * Should the exceptions be thrown or caugth and trapped in the response?
-     * 
+     *
      * @var boolean
      * @access protected
      */
@@ -98,7 +98,7 @@ class Parser
     /**
      * Contains special whois server like member whois configuration. It will be
      * used to overload the respective template in WhoisParserConfig.
-     * 
+     *
      * @var array
      * @access protected
      */
@@ -114,7 +114,7 @@ class Parser
 
     /**
      * Output format for dates
-     * 
+     *
      * @var string
      * @access protected
      */
@@ -122,7 +122,7 @@ class Parser
 
     /**
      * Activate cache
-     * 
+     *
      * @var string Cache location
      * @access protected
      */
@@ -152,7 +152,7 @@ class Parser
 
     /**
      * Creates a WhoisParser object
-     * 
+     *
      * @param  string $format
 	 */
     public function __construct($format = 'object')
@@ -163,7 +163,7 @@ class Parser
     /**
      * Set special whois server like member whois configuration. It will be
      * used to overload the respective template in WhoisParserConfig.
-     * 
+     *
      * @param  array $specialWhois
 	 * @return void
 	 */
@@ -174,7 +174,7 @@ class Parser
 
     /**
 	 * Lookup an IP address (ipv4 and ipv6) and domain names
-	 * 
+	 *
 	 * @throws NoQueryException
 	 * @throws instance of AbstractException if throwExceptions = true
 	 * @param  string $query
@@ -184,14 +184,14 @@ class Parser
     {
         $this->Result = new Result();
         $this->Config = new Config($this->specialWhois, $this->customConfigFile);
-        
+
         try {
             if ($query == '') {
                 throw new NoQueryException('No lookup query given');
             }
-            
+
             $this->prepare($query);
-            
+
             if (isset($this->Query->ip)) {
                 $config = $this->Config->get('iana');
             } else {
@@ -200,24 +200,24 @@ class Parser
                 } else {
                     $config = $this->Config->get($this->Query->asn);
                 }
-                
+
                 if ($config['server'] == '' || $this->Query->domain == '') {
                     $config = $this->Config->get('iana');
                 }
             }
-            
+
             $this->Config->setCurrent($config);
             $this->call();
         } catch (AbstractException $e) {
             if ($this->throwExceptions) {
                 throw $e;
             }
-            
+
             $this->Result->addItem('exception', $e->getMessage());
             $this->Result->addItem('rawdata', $this->rawdata);
-            
+
             if (isset($this->Query)) {
-                
+
                 if (isset($this->Query->ip)) {
                     $this->Result->addItem('name', $this->Query->ip);
                 } else {
@@ -227,10 +227,10 @@ class Parser
                 $this->Result->addItem('name', $query);
             }
         }
-        
+
         // call cleanUp method
         $this->Result->cleanUp($this->Config->getCurrent(), $this->dateformat);
-        
+
         // peparing output of Result by format
         switch ($this->format) {
             case 'json':
@@ -252,7 +252,7 @@ class Parser
 
     /**
      * Parses the given query to get either the domain name or an IP address
-     * 
+     *
      * @param  string $query
      * @return void
      */
@@ -260,10 +260,17 @@ class Parser
     {
         // check if given query is an IP address and AS number or possible
         // domain name
-        if ($this->bin2ip($this->ip2bin($query)) === $query) {
+
+        if (filter_var($query, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) == true || filter_var($query, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) == true) {
             $this->Query = new \stdClass();
             $this->Query->ip = $query;
-        } elseif (preg_match('/^AS[0-9]*$/im', $query)) {
+        }
+        // How it was handle before modification
+        // if ($this->bin2ip($this->ip2bin($query)) === $query) {
+        //     $this->Query = new \stdClass();
+        //     $this->Query->ip = $query;
+        //     }
+          elseif (preg_match('/^AS[0-9]*$/im', $query)) {
             $this->Query = new \stdClass();
             $this->Query->asn = $query;
         } else {
@@ -278,7 +285,7 @@ class Parser
 
     /**
      * Send data to whois server and call parse() to process rawdata
-     * 
+     *
      * @throws NoAdapterException
      * @throws RateLimitException
      * @param  string $query
@@ -289,7 +296,7 @@ class Parser
         if ($query != '') {
             $this->Query = filter_var($query, FILTER_SANITIZE_STRING);
         }
-        
+
         $Config = $this->Config->getCurrent();
         $Adapter = AbstractAdapter::factory($Config['adapter'], $this->proxyConfigFile, $this->customAdapterNamespace);
         $server = $Config['server'];
@@ -308,7 +315,7 @@ class Parser
 
     /**
      * Parses rawdata from whois server and call postProcess if exists afterwards
-     * 
+     *
      * @throws NoTemplateException
      * @throws RateLimitException
      * @return void
@@ -333,21 +340,21 @@ class Parser
                 }
                 throw new RateLimitException("Rate limit exceeded for server: ". $server);
             }
-            
+
             // set rawdata to Result - this happens here because sometimes we
             // have to fix the rawdata as well in postProcess
             $this->Result->addItem('rawdata', $this->rawdata);
 
             // set registered to Result
             $this->Result->addItem('registered', isset($this->Result->registered) ? $this->Result->registered : false);
-            
+
             if (! isset($this->Result->whoisserver)) {
                 $this->Result->addItem('whoisserver', $Config['server']);
             }
-            
+
             // start post processing
             $Template->postProcess($this);
-            
+
             // set name to Result
             if (isset($this->Query->tld) && ! isset($this->Query->fqdn)) {
                 $this->Result->addItem('name', $this->Query->tld);
@@ -366,7 +373,7 @@ class Parser
 
     /**
      * Converts IP address to binary
-     * 
+     *
      * @param  string $ip
      * @return mixed
      */
@@ -375,30 +382,30 @@ class Parser
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
             return base_convert(ip2long($ip), 10, 2);
         }
-        
+
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false) {
             return false;
         }
-        
+
         if (($ip_n = inet_pton($ip)) === false) {
             return false;
         }
-        
+
         $bits = 15; // 16 x 8 bit = 128bit (ipv6)
         $ipbin = '';
-        
+
         while ($bits >= 0) {
             $bin = sprintf('%08b', (ord($ip_n[$bits])));
             $ipbin = $bin . $ipbin;
             $bits = $bits - 1;
         }
-        
+
         return $ipbin;
     }
 
     /**
      * Converts binary to IP address
-     * 
+     *
      * @param  string $bin
      * @return mixed
      */
@@ -408,32 +415,31 @@ class Parser
             // 32bits (ipv4)
             return long2ip(base_convert($bin, 2, 10));
         }
-        
         if (strlen($bin) !== 128) {
             return false;
         }
-        
+
         $pad = 128 - strlen($bin);
-        
+
         for ($i = 1; $i <= $pad; $i++) {
             $bin = '0' . $bin;
         }
-        
+
         $bits = 0;
         $ipv6 = '';
-        
+
         while ($bits <= 7) {
             $bin_part = substr($bin, ($bits * 16), 16);
             $ipv6 = $ipv6 . dechex(bindec($bin_part)) . ':';
             $bits = $bits + 1;
         }
-        
+
         return inet_ntop(inet_pton(substr($ipv6, 0, - 1)));
     }
 
     /**
      * Returns WhoisParserResult instance
-     * 
+     *
      * @return object
      */
     public function getResult()
@@ -443,7 +449,7 @@ class Parser
 
     /**
      * Returns WhoisParserConfig instance
-     * 
+     *
      * @return object
      */
     public function getConfig()
@@ -476,10 +482,10 @@ class Parser
 
     /**
      * Set date format
-     * 
+     *
      * You may choose your own date format. Please check http://php.net/strftime for further
      * details
-     * 
+     *
      * @param  string $dateformat
      * @return void
      */
