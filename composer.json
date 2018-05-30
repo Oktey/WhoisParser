@@ -1,5 +1,5 @@
 {
-    "name": "novutec/whoisparser"
+    "name": "oktey/whoisparser"
   , "type": "library"
   , "description": "Lookup domain names, IP addresses and AS numbers by WHOIS."
   , "keywords": ["whoisparser", "whois", "php"]
