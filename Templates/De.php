@@ -1,12 +1,12 @@
 <?php
 /**
  * Novutec Domain Tools
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,38 +39,38 @@ class De extends Regex
 
     /**
 	 * Blocks within the raw output of the whois
-	 * 
+	 *
 	 * @var array
 	 * @access protected
 	 */
-    protected $blocks = array(1 => '/domain:(?>[\x20\t]*)(.*?)[\n]{2}/is', 
+    protected $blocks = array(1 => '/domain:(?>[\x20\t]*)(.*?)\n(\n|$)/is',
             2 => '/\[(holder|zone|tech|admin)(\-c)?\]\n(.*?)([\n]{2}|$)/is');
 
     /**
 	 * Items for each block
-	 * 
+	 *
 	 * @var array
 	 * @access protected
 	 */
     protected $blockItems = array(
-            1 => array('/nserver:(?>[\x20\t]*)(.+)$/im' => 'nameserver', 
-                    '/status:(?>[\x20\t]*)(.+)$/im' => 'status', 
-                    '/dnskey:(?>[\x20\t]*)(.+)$/im' => 'dnssec', 
-                    '/changed:(?>[\x20\t]*)(.+)$/im' => 'changed', 
-                    '/regaccname:(?>[\x20\t]*)(.+)$/im' => 'registrar:name', 
-                    '/regcccid:(?>[\x20\t]*)(.+)$/im' => 'registrar:id'), 
-            
-            2 => array('/\[(holder|zone|tech|admin)/i' => 'contacts:reservedType', 
-                    '/type:(?>[\x20\t]*)(.+)$/im' => 'contacts:type', 
-                    '/name:(?>[\x20\t]*)(.+)$/im' => 'contacts:name', 
-                    '/organisation:(?>[\x20\t]*)(.+)$/im' => 'contacts:organization', 
-                    '/address:(?>[\x20\t]*)(.+)$/im' => 'contacts:address', 
-                    '/postalcode:(?>[\x20\t]*)(.+)$/im' => 'contacts:zipcode', 
-                    '/city:(?>[\x20\t]*)(.+)$/im' => 'contacts:city', 
-                    '/countrycode:(?>[\x20\t]*)(.+)$/im' => 'contacts:country', 
-                    '/phone:(?>[\x20\t]*)(.+)$/im' => 'contacts:phone', 
-                    '/fax:(?>[\x20\t]*)(.+)$/im' => 'contacts:fax', 
-                    '/email:(?>[\x20\t]*)(.+)$/im' => 'contacts:email', 
+            1 => array('/nserver:(?>[\x20\t]*)(.+)$/im' => 'nameserver',
+                    '/status:(?>[\x20\t]*)(.+)$/im' => 'status',
+                    '/dnskey:(?>[\x20\t]*)(.+)$/im' => 'dnssec',
+                    '/changed:(?>[\x20\t]*)(.+)$/im' => 'changed',
+                    '/regaccname:(?>[\x20\t]*)(.+)$/im' => 'registrar:name',
+                    '/regcccid:(?>[\x20\t]*)(.+)$/im' => 'registrar:id'),
+
+            2 => array('/\[(holder|zone|tech|admin)/i' => 'contacts:reservedType',
+                    '/type:(?>[\x20\t]*)(.+)$/im' => 'contacts:type',
+                    '/name:(?>[\x20\t]*)(.+)$/im' => 'contacts:name',
+                    '/organisation:(?>[\x20\t]*)(.+)$/im' => 'contacts:organization',
+                    '/address:(?>[\x20\t]*)(.+)$/im' => 'contacts:address',
+                    '/postalcode:(?>[\x20\t]*)(.+)$/im' => 'contacts:zipcode',
+                    '/city:(?>[\x20\t]*)(.+)$/im' => 'contacts:city',
+                    '/countrycode:(?>[\x20\t]*)(.+)$/im' => 'contacts:country',
+                    '/phone:(?>[\x20\t]*)(.+)$/im' => 'contacts:phone',
+                    '/fax:(?>[\x20\t]*)(.+)$/im' => 'contacts:fax',
+                    '/email:(?>[\x20\t]*)(.+)$/im' => 'contacts:email',
                     '/changed:(?>[\x20\t]*)(.+)$/im' => 'contacts:changed'));
 
     /**
@@ -92,13 +92,13 @@ class De extends Regex
     public function postProcess(&$WhoisParser)
     {
         $ResultSet = $WhoisParser->getResult();
-        
+
         if ($ResultSet->dnssec != '') {
             $ResultSet->dnssec = true;
         } else {
             $ResultSet->dnssec = false;
         }
-        
+
         if (isset($ResultSet->contacts->holder)) {
             $ResultSet->contacts->owner = $ResultSet->contacts->holder;
             unset($ResultSet->contacts->holder);
